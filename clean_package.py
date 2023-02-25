@@ -25,8 +25,11 @@ def package():
     os.system(f"jar --create --file {jar} -C {classes} {class_name}")
     os.system(f"javac -cp {jar} -d {classes} java/P.java")
 
+def run():
+    os.system(f"java -cp {classes} P")
+
 def help():
-    print("Usage: clean_package <goal> where goal is in { clean; package; help }")
+    print("Usage: clean_package <goal> where goal is in { clean; package; run; help }")
 
 if __name__ == "__main__":
     goal = sys.argv[1] if len(sys.argv) > 1 else "help"
@@ -36,6 +39,10 @@ if __name__ == "__main__":
     elif goal == "package":
         clean()
         package()
+    elif goal == "run":
+        clean()
+        package()
+        run()
     else:
         help()
     

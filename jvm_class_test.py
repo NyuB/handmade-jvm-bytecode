@@ -32,6 +32,12 @@ class PythonJvmClassTest(unittest.TestCase):
         javac = f"javac -cp {self.output_classes} -d {self.output_classes} java/P.java"
         self.assert_command_success(javac)
 
+    def test_run_with_java(self):
+        write_bytes(self.output_class, jvm_class.jvm_class_bytes())
+        javac = f"javac -cp {self.output_classes} -d {self.output_classes} java/P.java"
+        self.assert_command_success(javac)
+        java = f"java -cp {self.output_classes} P"
+        self.assert_command_success(java)
 
 def rm(f: str) -> None:
     try:
