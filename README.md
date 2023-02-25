@@ -26,6 +26,15 @@ Ths will generate 'manually' a **Python.class** in **target/classes**, a jar **t
 py clean_package.py clean
 ```
 
+## Running compiled classes
+
+To run P.main(args) { ... } with `java`
+
+```bash
+py clean_package.py run
+```
+
+**NB:** This will clean and recompile the sources before actually running
 ## Include generated classes to your IDE scope
 
 ### VsCode
