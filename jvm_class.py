@@ -54,16 +54,16 @@ def jvm_class_bytes() -> list[bytes]:
 
 def empty_constructor_code(code_index: int, super_init_index: int) -> list[bytes]:
     return method_code(code_index, [
-        b"\x2A", #aload_0
-        *[b"\xb7", cpool_index(super_init_index)], #invokespecial super.<init>
-        b"\xb1", # return
+        aload_0, # place super instance from local variable 0 on top of the stack
+        *[invokespecial, cpool_index(super_init_index)], # call super.<init>() on the super object
+        _return,
     ])
 
 def string_empty_method_code(code_index: int, string_index: int) -> list[bytes]:
     return method_code(code_index, [
-        *[ldc_w, cpool_index(string_index)], # load string return on top of the stack
-        areturn,
-    ]) # just return
+        *[ldc_w, cpool_index(string_index)], # load string on top of the stack
+        areturn, # return the reference on top of the stack
+    ])
 
 def method_code(code_index: int, operations: list[bytes]) -> list[bytes]:
     body = [
@@ -116,6 +116,9 @@ def classfile_name_and_type_descriptor(name_index: int, type_index: int) -> list
 def classfile_method_reference(class_index: int, name_and_type_index: int) -> list[bytes]:
     return [u1(10), cpool_index(class_index), cpool_index(name_and_type_index)]
 
+def byte_length(bytes_list: list[bytes]) -> int:
+    return sum([len(b) for b in bytes_list])
+
 U4_MAGIC_NUMBER: bytes = b"\xCA\xFE\xBA\xBE"
 VERSION_JAVA_8: bytes = u2(52)
 CLASSFILE_STRING_TAG = u1(1)
@@ -125,10 +128,10 @@ CLASSFILE_ACCESS_PUBLIC = u2(1)
 METHOD_INIT = classfile_string("<init>")
 U_EMPTY_TABLE: bytes = b""
 
-def byte_length(bytes_list: list[bytes]) -> int:
-    return sum([len(b) for b in bytes_list])
 
 # opcodes
-
+aload_0 = b"\x2a"
 areturn = b"\xb0"
+invokespecial = b"\xb7"
 ldc_w = b"\x13"
+_return = b"\xb1"
