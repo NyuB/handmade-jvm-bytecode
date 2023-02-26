@@ -15,7 +15,7 @@ py -m unittest jvm_class_test.py
 ## Generating and compiling .class files
 
 ```bash
-py clean_package.py package
+py build.py package
 ```
 
 Ths will generate 'manually' a **Python.class** in **target/classes**, a jar **target/python.jar** containing this generated .class, and a class **target/classes/P.class** compiled from source **java/P.java** depending on **python.jar**
@@ -23,7 +23,7 @@ Ths will generate 'manually' a **Python.class** in **target/classes**, a jar **t
 ## Clean target folder
 
 ```bash
-py clean_package.py clean
+py build.py clean
 ```
 
 ## Running compiled classes
@@ -31,7 +31,7 @@ py clean_package.py clean
 To run P.main(args) { ... } with `java`
 
 ```bash
-py clean_package.py run
+py build.py run
 ```
 
 **NB:** This will clean and recompile the sources before actually running
