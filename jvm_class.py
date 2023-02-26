@@ -19,7 +19,7 @@ def jvm_class_bytes() -> list[bytes]:
             *classfile_string("hi"),
             *classfile_string("Code"), # Code attribute name
             *classfile_name_and_type_descriptor(5, 6), # void <init>()
-            *classfile_method_reference(3, 9),
+            *classfile_method_reference(3, 9), # void Object.<init>()
         ], 
         CLASSFILE_ACCESS_PUBLIC, # Public class
         cpool_index(1), # this => point to the first entry in constant pool
@@ -35,44 +35,50 @@ def jvm_class_bytes() -> list[bytes]:
                 cpool_index(5), # Name index in constant pool
                 cpool_index(6), # Method descriptor index,
                 u2(1), # Attributes count = 1
-                *[ # attribute table
-                    cpool_index(8), # Code string at index 8
-                    u4(17), # attr length in bytes
-                    u2(1), # stack length = 1
-                    u2(1), # locals length = 1
-                    u4(5), # code length in bytes
-                    *[ # code
-                        b"\x2A", #aload_0
-                        *[b"\xb7", cpool_index(10)], #invokespecial Object.<init>
-                        b"\xb1", # return
-                    ],
-                    u2(0), # exception table length
-                    U_EMPTY_TABLE, #exception
-                    u2(0), # attributes count
-                    U_EMPTY_TABLE, # attribute table
-                ],
+                *empty_constructor_code(8, 10),
             ],
             *[ # void hi() { }
                 CLASSFILE_ACCESS_PUBLIC,
                 cpool_index(7),
                 cpool_index(6),
                 u2(1), # Attributes count = 1
-                *[ # attribute table
-                    cpool_index(8), # Code string at index 8
-                    u4(13), # attr length in bytes
-                    u2(1), # stack length = 1
-                    u2(1), # locals length = 1
-                    u4(1), # code length in bytes
-                    *[b"\xB1"], # code = return
-                    u2(0), # exception table length
-                    U_EMPTY_TABLE, #exception
-                    u2(0), # attributes count
-                    U_EMPTY_TABLE, # attribute table
-                ],
+                *void_empty_method_code(8),
             ]
         ],
         u2(0), # attributes count = 0
         U_EMPTY_TABLE, # empty attribute table
+    ]
+
+def empty_constructor_code(code_index: int, super_init_index: int) -> list[bytes]:
+    return method_code(code_index, [
+        b"\x2A", #aload_0
+        *[b"\xb7", cpool_index(super_init_index)], #invokespecial super.<init>
+        b"\xb1", # return
+    ])
+
+def void_empty_method_code(code_index: int) -> list[bytes]:
+    return method_code(code_index, [b"\xB1"]) # just return
+
+def method_code(code_index: int, operations: list[bytes]) -> list[bytes]:
+    body = [
+        u2(1), # stack length = 1
+        u2(1), # locals length = 1
+        u4(byte_length(operations)), # code length in bytes
+        *operations,
+        u2(0), # exception table length
+        U_EMPTY_TABLE, #exception
+        u2(0), # attributes count
+        U_EMPTY_TABLE, # attribute table  
+    ]
+
+    header = [
+        cpool_index(code_index), # Code string at index 8
+        u4(byte_length(body)), # attr length in bytes
+    ]
+
+    return [
+        *header,
+        *body
     ]
 
 def u1(i: int) -> bytes:
@@ -108,3 +114,6 @@ CLASSFILE_CLASS_TAG = u1(7)
 CLASSFILE_ACCESS_PUBLIC = u2(1)
 METHOD_INIT = classfile_string("<init>")
 U_EMPTY_TABLE: bytes = b""
+
+def byte_length(bytes_list: list[bytes]) -> int:
+    return sum([len(b) for b in bytes_list])
