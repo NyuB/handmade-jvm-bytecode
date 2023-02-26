@@ -8,18 +8,21 @@ def jvm_class_bytes() -> list[bytes]:
         U4_MAGIC_NUMBER,
         u2(1), # Minor version (1)
         VERSION_JAVA_8, # Major version
-        u2(11), # constant pool size = len(constant pool) + 1
+        u2(14), # constant pool size = len(constant pool) + 1
         *[ # constant pool
             *classfile_class(2), # classname at index 2
             *classfile_string("Python"),
             *classfile_class(4), # classname at index 4
             *classfile_string("java/lang/Object"),
             *METHOD_INIT,
-            *classfile_void_method_param_descriptor("V"), # V for void return type
+            *classfile_void_method_param_descriptor("V"), # () -> ()
             *classfile_string("hi"),
             *classfile_string("Code"), # Code attribute name
             *classfile_name_and_type_descriptor(5, 6), # void <init>()
             *classfile_method_reference(3, 9), # void Object.<init>()
+            *classfile_string("Hello java, you don't know me but i do know you ;)"),
+            *classfile_void_method_param_descriptor("Ljava/lang/String;"), # () -> java.lang.String
+            *classfile_string_reference(11),
         ], 
         CLASSFILE_ACCESS_PUBLIC, # Public class
         cpool_index(1), # this => point to the first entry in constant pool
@@ -37,12 +40,12 @@ def jvm_class_bytes() -> list[bytes]:
                 u2(1), # Attributes count = 1
                 *empty_constructor_code(8, 10),
             ],
-            *[ # void hi() { }
+            *[ # String hi() { }
                 CLASSFILE_ACCESS_PUBLIC,
                 cpool_index(7),
-                cpool_index(6),
+                cpool_index(12),
                 u2(1), # Attributes count = 1
-                *void_empty_method_code(8),
+                *string_empty_method_code(8, 13),
             ]
         ],
         u2(0), # attributes count = 0
@@ -56,8 +59,11 @@ def empty_constructor_code(code_index: int, super_init_index: int) -> list[bytes
         b"\xb1", # return
     ])
 
-def void_empty_method_code(code_index: int) -> list[bytes]:
-    return method_code(code_index, [b"\xB1"]) # just return
+def string_empty_method_code(code_index: int, string_index: int) -> list[bytes]:
+    return method_code(code_index, [
+        *[ldc_w, cpool_index(string_index)], # load string return on top of the stack
+        areturn,
+    ]) # just return
 
 def method_code(code_index: int, operations: list[bytes]) -> list[bytes]:
     body = [
@@ -91,6 +97,9 @@ def u4(i: int) -> bytes:
 def classfile_string(s: str) -> list[bytes]:
     return [CLASSFILE_STRING_TAG, u2(len(s)), s.encode(encoding = "utf-8")]
 
+def classfile_string_reference(str_index: int) -> list[bytes]:
+    return [CLASSFILE_STRING_REF_TAG, cpool_index(str_index)]
+
 def classfile_class(name_index: int) -> list[bytes]:
     return [CLASSFILE_CLASS_TAG, cpool_index(name_index)]
 
@@ -110,6 +119,7 @@ def classfile_method_reference(class_index: int, name_and_type_index: int) -> li
 U4_MAGIC_NUMBER: bytes = b"\xCA\xFE\xBA\xBE"
 VERSION_JAVA_8: bytes = u2(52)
 CLASSFILE_STRING_TAG = u1(1)
+CLASSFILE_STRING_REF_TAG = u1(8)
 CLASSFILE_CLASS_TAG = u1(7)
 CLASSFILE_ACCESS_PUBLIC = u2(1)
 METHOD_INIT = classfile_string("<init>")
@@ -117,3 +127,8 @@ U_EMPTY_TABLE: bytes = b""
 
 def byte_length(bytes_list: list[bytes]) -> int:
     return sum([len(b) for b in bytes_list])
+
+# opcodes
+
+areturn = b"\xb0"
+ldc_w = b"\x13"
