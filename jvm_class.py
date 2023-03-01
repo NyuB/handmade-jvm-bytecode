@@ -3,6 +3,10 @@ Custom class file bytecode generation
 jvm_class_bytes defines the actual layout of the generated 'Crafted' class file
 """
 
+import functools
+
+jvm_class_name = "Crafted"
+
 def jvm_class_bytes() -> list[bytes]:
     return [
         U4_MAGIC_NUMBER,
@@ -11,7 +15,7 @@ def jvm_class_bytes() -> list[bytes]:
         u2(16), # constant pool size = len(constant pool) + 1
         *[ # constant pool
             *classfile_class(2), # classname at index 2
-            *classfile_string("Crafted"),
+            *classfile_string(jvm_class_name),
             *classfile_class(4), # classname at index 4
             *classfile_string("java/lang/Object"),
             *METHOD_INIT,
@@ -33,7 +37,7 @@ def jvm_class_bytes() -> list[bytes]:
         U_EMPTY_TABLE, # empty interface table
         u2(1), # fields count = 1
         *[
-            CLASSFILE_ACCESS_PUBLIC, # public field
+            CLASSFILE_ACCESS_PUBLIC_FINAL, # public final field
             cpool_index(14), # name index in constant pool
             cpool_index(15), # type descriptor in constant pool
             u2(0), # 0 attributes
@@ -129,12 +133,17 @@ def classfile_method_reference(class_index: int, name_and_type_index: int) -> li
 def byte_length(bytes_list: list[bytes]) -> int:
     return sum([len(b) for b in bytes_list])
 
+def combine_access_flags(flags: list[bytes]) -> bytes:
+    return functools.reduce(lambda a, b: a + b, flags, b"\x00\x00")
+
 U4_MAGIC_NUMBER: bytes = b"\xCA\xFE\xBA\xBE"
 VERSION_JAVA_8: bytes = u2(52)
 CLASSFILE_STRING_TAG = u1(1)
 CLASSFILE_STRING_REF_TAG = u1(8)
 CLASSFILE_CLASS_TAG = u1(7)
 CLASSFILE_ACCESS_PUBLIC = u2(1)
+CLASSFILE_ACCESS_FINAL = u2(16)
+CLASSFILE_ACCESS_PUBLIC_FINAL = u2(17)
 METHOD_INIT = classfile_string("<init>")
 U_EMPTY_TABLE: bytes = b""
 
