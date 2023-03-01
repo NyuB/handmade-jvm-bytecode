@@ -2,8 +2,15 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.Path;
 
 public class TestClassLoader extends ClassLoader {
+    private final Path classDir;
+
+    public TestClassLoader(Path classDir) {
+        this.classDir = classDir;
+    }
+
     public Class<?> findClass(String name) {
         byte[] b = readCustomClassFile(name);
         return defineClass(name, b, 0, b.length);
@@ -11,14 +18,14 @@ public class TestClassLoader extends ClassLoader {
 
     public byte[] readCustomClassFile(String name) {
         try {
-            return Files.readAllBytes(Paths.get(String.format("target/classes/%s.class", name)));
+            return Files.readAllBytes(this.classDir.resolve(name + ".class"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     public static void main(String[] args) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, SecurityException {
-        Class<?> craftedClass = new TestClassLoader().findClass(args[0]);
+        Class<?> craftedClass = new TestClassLoader(Paths.get(args[0])).findClass(args[1]);
         System.out.println(craftedClass);
         try {
             Object instance = craftedClass.getConstructors()[0].newInstance();
