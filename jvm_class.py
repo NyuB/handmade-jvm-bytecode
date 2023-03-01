@@ -48,7 +48,6 @@ def jvm_class_bytes() -> list[bytes]:
             U_EMPTY_TABLE, # no attributes
 
         ],
-        U_EMPTY_TABLE, # empty field table
         u2(3), # methods count = 3
         *[ # method table
             *[ # constructor
