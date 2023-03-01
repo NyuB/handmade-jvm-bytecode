@@ -10,7 +10,7 @@ jvm_class_name = "Crafted"
 def jvm_class_bytes() -> list[bytes]:
     return [
         U4_MAGIC_NUMBER,
-        u2(1), # Minor version (1)
+        u2(0), # Minor version (0)
         VERSION_JAVA_8, # Major version
         u2(16), # constant pool size = len(constant pool) + 1
         *[ # constant pool
