@@ -3,6 +3,7 @@ public class JavaClass {
         System.out.println("Hey there, what's this Crafted thing ?");
         Crafted crafted = new Crafted();
         System.out.println(crafted.hi());
+        System.out.println("Crafted id field is : " + crafted.craftedId);
         System.out.println("See you !");
     }
 }

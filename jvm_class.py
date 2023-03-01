@@ -8,7 +8,7 @@ def jvm_class_bytes() -> list[bytes]:
         U4_MAGIC_NUMBER,
         u2(1), # Minor version (1)
         VERSION_JAVA_8, # Major version
-        u2(14), # constant pool size = len(constant pool) + 1
+        u2(16), # constant pool size = len(constant pool) + 1
         *[ # constant pool
             *classfile_class(2), # classname at index 2
             *classfile_string("Crafted"),
@@ -23,13 +23,23 @@ def jvm_class_bytes() -> list[bytes]:
             *classfile_string("Hello java, you don't know me but i do know you ;)"),
             *classfile_void_method_param_descriptor("Ljava/lang/String;"), # () -> java.lang.String
             *classfile_string_reference(11),
+            *classfile_string("craftedId"),
+            *classfile_string("I"), # int
         ], 
         CLASSFILE_ACCESS_PUBLIC, # Public class
         cpool_index(1), # this => point to the first entry in constant pool
         cpool_index(3), # super => point to the third entry in constant pool
         u2(0), # implemented interfaces count = 0
         U_EMPTY_TABLE, # empty interface table
-        u2(0), # fields count = 0
+        u2(1), # fields count = 1
+        *[
+            CLASSFILE_ACCESS_PUBLIC, # public field
+            cpool_index(14), # name index in constant pool
+            cpool_index(15), # type descriptor in constant pool
+            u2(0), # 0 attributes
+            U_EMPTY_TABLE, # no attributes
+
+        ],
         U_EMPTY_TABLE, # empty field table
         u2(2), # methods count = 2
         *[ # method table
