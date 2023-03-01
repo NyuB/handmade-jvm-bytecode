@@ -1,0 +1,32 @@
+on:
+  pull_request:
+    branches:
+    - main
+  push:
+    branches:
+    - main
+jobs:
+  tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        include:
+          - os: windows-latest
+            python-cmd: py
+            name: Windows
+          - os: ubuntu-latest
+            python-cmd: python3
+            name: Linux
+          - os: macOS-latest
+            python-cmd: python3
+            name: MacOS
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Check Java
+        run: java -version
+      - name: Check Python
+        run: ${{ matrix.python-cmd }} --version
+      - name: Unit tests
+        run: ${{ matrix.python-cmd }} -m unittest jvm_class_test.py
