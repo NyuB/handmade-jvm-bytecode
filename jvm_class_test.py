@@ -40,14 +40,14 @@ class PythonJvmClassTest(unittest.TestCase):
         write_bytes(self.output_class, jvm_class.jvm_class_bytes())
         javac = f"javac -cp {self.output_classes} -d {self.output_classes} {self.java_source}"
         self.assert_command_success(javac)
-        java = f"java -cp {self.output_classes} {self.java_class_name}"
+        java = f"java -ea -cp {self.output_classes} {self.java_class_name}"
         self.assert_command_success(java)
     
     def test_run_with_java_class_loader(self):
         write_bytes(self.output_class, jvm_class.jvm_class_bytes())
         javac = f"javac -cp {self.output_classes} -d {self.output_classes} {self.java_class_loader_source}"
         self.assert_command_success(javac)
-        java = f"java -cp {self.output_classes} {self.java_class_loader_name} {self.output_classes} {jvm_class.jvm_class_name}"
+        java = f"java -ea -cp {self.output_classes} {self.java_class_loader_name} {self.output_classes} {jvm_class.jvm_class_name}"
         self.assert_command_success(java)
 
 

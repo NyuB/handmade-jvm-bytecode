@@ -12,7 +12,7 @@ def jvm_class_bytes() -> list[bytes]:
         U4_MAGIC_NUMBER,
         u2(0), # Minor version (0)
         VERSION_JAVA_8, # Major version
-        u2(16), # constant pool size = len(constant pool) + 1
+        u2(20), # constant pool size = len(constant pool) + 1
         *[ # constant pool
             *classfile_class(2), # classname at index 2
             *classfile_string(jvm_class_name),
@@ -29,6 +29,10 @@ def jvm_class_bytes() -> list[bytes]:
             *classfile_string_reference(11),
             *classfile_string("craftedId"),
             *classfile_string("I"), # int
+            *classfile_string("setCraftedId"),
+            *classfile_method_descriptor(["I"], "V"), # (int) -> void
+            *classfile_name_and_type_descriptor(14, 15),
+            *classfile_field_reference(1, 18),
         ], 
         CLASSFILE_ACCESS_PUBLIC, # Public class
         cpool_index(1), # this => point to the first entry in constant pool
@@ -37,7 +41,7 @@ def jvm_class_bytes() -> list[bytes]:
         U_EMPTY_TABLE, # empty interface table
         u2(1), # fields count = 1
         *[
-            CLASSFILE_ACCESS_PUBLIC_FINAL, # public final field
+            CLASSFILE_ACCESS_PUBLIC, # public final field
             cpool_index(14), # name index in constant pool
             cpool_index(15), # type descriptor in constant pool
             u2(0), # 0 attributes
@@ -45,7 +49,7 @@ def jvm_class_bytes() -> list[bytes]:
 
         ],
         U_EMPTY_TABLE, # empty field table
-        u2(2), # methods count = 2
+        u2(3), # methods count = 3
         *[ # method table
             *[ # constructor
                 CLASSFILE_ACCESS_PUBLIC, # Public method
@@ -60,29 +64,43 @@ def jvm_class_bytes() -> list[bytes]:
                 cpool_index(12),
                 u2(1), # Attributes count = 1
                 *string_empty_method_code(8, 13),
-            ]
+            ],
+            *[ # void setCraftedField(int craftedField) { this.craftedField = craftedField; }
+              CLASSFILE_ACCESS_PUBLIC,  
+              cpool_index(16),
+              cpool_index(17),
+              u2(1),
+              *int_setter_method(8, 19),
+            ],
         ],
         u2(0), # attributes count = 0
         U_EMPTY_TABLE, # empty attribute table
     ]
+
+def int_setter_method(code_index: int, field_reference_index: int) -> list[bytes]:
+    return method_code(code_index, [
+        aload_0, iload_1, # load arg value then this ref onto the stack
+        *[putfield, cpool_index(field_reference_index)], # assign field
+        _return
+    ], stackSize = 2, localSize = 2)
 
 def empty_constructor_code(code_index: int, super_init_index: int) -> list[bytes]:
     return method_code(code_index, [
         aload_0, # place super instance from local variable 0 on top of the stack
         *[invokespecial, cpool_index(super_init_index)], # call super.<init>() on the super object
         _return,
-    ])
+    ], stackSize = 1)
 
 def string_empty_method_code(code_index: int, string_index: int) -> list[bytes]:
     return method_code(code_index, [
         *[ldc_w, cpool_index(string_index)], # load string on top of the stack
         areturn, # return the reference on top of the stack
-    ])
+    ], stackSize = 1)
 
-def method_code(code_index: int, operations: list[bytes]) -> list[bytes]:
+def method_code(code_index: int, operations: list[bytes], stackSize: int = 0, localSize: int = 1) -> list[bytes]:
     body = [
-        u2(1), # stack length = 1
-        u2(1), # locals length = 1
+        u2(stackSize),
+        u2(localSize),
         u4(byte_length(operations)), # code length in bytes
         *operations,
         u2(0), # exception table length
@@ -121,14 +139,20 @@ def cpool_index(index: int) -> bytes:
     return u2(index)
 
 def classfile_void_method_param_descriptor(returnType: str) -> list[bytes]:
-    descriptor = f"(){returnType}"
+    return classfile_method_descriptor([], returnType)
+
+def classfile_method_descriptor(params: list[str], returnType: str) -> list[bytes]:
+    descriptor = f"({''.join(params)}){returnType}"
     return classfile_string(descriptor)
 
 def classfile_name_and_type_descriptor(name_index: int, type_index: int) -> list[bytes]:
-    return [u1(12), cpool_index(name_index), cpool_index(type_index)]
+    return [CLASSFILE_NAME_AND_TYPE_DESCRIPTOR_TAG, cpool_index(name_index), cpool_index(type_index)]
+
+def classfile_field_reference(class_index: int, name_and_type_descriptor_index: int) -> list[bytes]:
+    return [CLASSFILE_FIELD_REF_TAG, cpool_index(class_index), cpool_index(name_and_type_descriptor_index)]
 
 def classfile_method_reference(class_index: int, name_and_type_index: int) -> list[bytes]:
-    return [u1(10), cpool_index(class_index), cpool_index(name_and_type_index)]
+    return [CLASSFILE_METHOD_REF_TAG, cpool_index(class_index), cpool_index(name_and_type_index)]
 
 def byte_length(bytes_list: list[bytes]) -> int:
     return sum([len(b) for b in bytes_list])
@@ -141,6 +165,9 @@ VERSION_JAVA_8: bytes = u2(52)
 CLASSFILE_STRING_TAG = u1(1)
 CLASSFILE_STRING_REF_TAG = u1(8)
 CLASSFILE_CLASS_TAG = u1(7)
+CLASSFILE_FIELD_REF_TAG = u1(9)
+CLASSFILE_METHOD_REF_TAG = u1(10)
+CLASSFILE_NAME_AND_TYPE_DESCRIPTOR_TAG = u1(12)
 CLASSFILE_ACCESS_PUBLIC = u2(1)
 CLASSFILE_ACCESS_FINAL = u2(16)
 CLASSFILE_ACCESS_PUBLIC_FINAL = u2(17)
@@ -150,7 +177,11 @@ U_EMPTY_TABLE: bytes = b""
 
 # opcodes
 aload_0 = b"\x2a"
+aload_1 = b"\x2b"
 areturn = b"\xb0"
+iload_0 = b"\x1a"
+iload_1 = b"\x1b"
 invokespecial = b"\xb7"
 ldc_w = b"\x13"
+putfield = b"\xb5"
 _return = b"\xb1"
