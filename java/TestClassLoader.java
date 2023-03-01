@@ -18,10 +18,10 @@ public class TestClassLoader extends ClassLoader {
     }
 
     public static void main(String[] args) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, SecurityException {
-        Class<?> pythonClass = new TestClassLoader().findClass(args[0]);
-        System.out.println(pythonClass);
+        Class<?> craftedClass = new TestClassLoader().findClass(args[0]);
+        System.out.println(craftedClass);
         try {
-            Object instance = pythonClass.getConstructors()[0].newInstance();
+            Object instance = craftedClass.getConstructors()[0].newInstance();
             System.out.println(instance);
         } catch(VerifyError e) {
             System.out.println("Invalid class constructor bytecode");

@@ -5,7 +5,9 @@ import shutil
 
 class PythonJvmClassTest(unittest.TestCase):
     output_classes = "plasses"
-    output_class = os.path.join(output_classes, "Python.class")
+    output_class = os.path.join(output_classes, "Crafted.class")
+    java_class_name = "JavaClass"
+    java_source = f"java/{java_class_name}.java"
 
     def setUp(self):
         try:
@@ -29,14 +31,14 @@ class PythonJvmClassTest(unittest.TestCase):
 
     def test_compile_with_java(self):
         write_bytes(self.output_class, jvm_class.jvm_class_bytes())
-        javac = f"javac -cp {self.output_classes} -d {self.output_classes} java/P.java"
+        javac = f"javac -cp {self.output_classes} -d {self.output_classes} {self.java_source}"
         self.assert_command_success(javac)
 
     def test_run_with_java(self):
         write_bytes(self.output_class, jvm_class.jvm_class_bytes())
-        javac = f"javac -cp {self.output_classes} -d {self.output_classes} java/P.java"
+        javac = f"javac -cp {self.output_classes} -d {self.output_classes} {self.java_source}"
         self.assert_command_success(javac)
-        java = f"java -cp {self.output_classes} P"
+        java = f"java -cp {self.output_classes} {self.java_class_name}"
         self.assert_command_success(java)
 
 def rm(f: str) -> None:

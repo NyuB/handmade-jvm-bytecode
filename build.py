@@ -3,9 +3,10 @@ import sys
 import jvm_class
 
 classes = "target/classes"
-class_name = "Python.class"
-jar ="target/python.jar"
-java_source = "java/P.java"
+class_name = "Crafted.class"
+jar ="target/crafted.jar"
+java_class_name = "JavaClass"
+java_source = f"java/{java_class_name}.java"
 
 def remove_force(dir: str):
     if os.path.isdir(dir):
@@ -35,10 +36,10 @@ def package():
             classfile.write(chunk)
 
     os.system(f"jar --verbose --create --file {jar} -C {classes} {class_name}")
-    os.system(f"javac -cp {jar} -d {classes} java/P.java")
+    os.system(f"javac -cp {jar} -d {classes} {java_source}")
 
 def run():
-    os.system(f"java -cp {classes} P")
+    os.system(f"java -cp {classes} {java_class_name}")
 
 def help():
     print("Usage: build <goal> where goal is in { clean; package; run; help }")

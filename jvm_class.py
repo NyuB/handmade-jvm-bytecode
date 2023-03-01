@@ -1,6 +1,6 @@
 """
 Custom class file bytecode generation
-jvm_class_bytes defines the actual layout of the generated 'Python' class file
+jvm_class_bytes defines the actual layout of the generated 'Crafted' class file
 """
 
 def jvm_class_bytes() -> list[bytes]:
@@ -11,7 +11,7 @@ def jvm_class_bytes() -> list[bytes]:
         u2(14), # constant pool size = len(constant pool) + 1
         *[ # constant pool
             *classfile_class(2), # classname at index 2
-            *classfile_string("Python"),
+            *classfile_string("Crafted"),
             *classfile_class(4), # classname at index 4
             *classfile_string("java/lang/Object"),
             *METHOD_INIT,
