@@ -24,9 +24,24 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
+      
+      - name: Install Scala
+        uses: coursier/setup-action@v1
+        with:
+          apps: scala scalac
+        
       - name: Check Java
-        run: java -version
+        run: |
+          java -version
+          javac -version
+      
+      - name: Check Scala
+        run: |
+          scala --version
+          scalac --version
+      
       - name: Check Python
         run: ${{ matrix.python-cmd }} --version
+      
       - name: Unit tests
         run: ${{ matrix.python-cmd }} -m unittest jvm_class_test.py
