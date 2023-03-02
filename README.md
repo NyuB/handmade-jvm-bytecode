@@ -3,7 +3,7 @@
 All the .class layout generation takes place in the method **jvm_class_bytes** in **jvm_class.py**
 
 ## Prerequisites
-+ `java`, `javac`, `jar` binaries in **PATH** with version > = 8 (the project CI uses java 8)
++ `java`, `javac`, `jar`, `scala`, `scalac` binaries in **PATH** with java version > = 8 (the project CI uses java 8)
 + `python3` (further examples in this documentation assume python3 command to be aliased by `py`)
 
 ## Running the tests
