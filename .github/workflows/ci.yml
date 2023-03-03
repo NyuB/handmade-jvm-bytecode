@@ -44,4 +44,4 @@ jobs:
         run: ${{ matrix.python-cmd }} --version
       
       - name: Unit tests
-        run: ${{ matrix.python-cmd }} -m unittest jvm_class_test.py
+        run: ${{ matrix.python-cmd }} -m unittest tests/class_generation_tests.py

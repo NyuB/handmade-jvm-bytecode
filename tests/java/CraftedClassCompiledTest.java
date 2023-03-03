@@ -1,4 +1,4 @@
-public class JavaClass {
+public class CraftedClassCompiledTest {
     public static void main(String[] args) {
         System.out.println("Hey there, what's this Crafted thing ?");
         Crafted crafted = new Crafted();

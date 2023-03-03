@@ -3,35 +3,40 @@
 All the .class layout generation takes place in the method **jvm_class_bytes** in **jvm_class.py**
 
 ## Prerequisites
-+ `java`, `javac`, `jar`, `scala`, `scalac` binaries in **PATH** with java version > = 8 (the project CI uses java 8)
++ `java`, `javac`, `jar` binaries in **PATH** with java version > = 8 (the project CI uses java 8)
 + `python3` (further examples in this documentation assume python3 command to be aliased by `py`)
++ (optionnal) `scala`, `scalac` binaries in **PATH** to be able to run the scala tests
 
 ## Running the tests
 
-```bash
-py -m unittest jvm_class_test.py
+```
+py -m unittest tests/class_generation_tests.py
 ```
 
-## Generating and compiling .class files
+code
 
+## Generating, compiling and jar-ing .class files
+
+### Using the python class generator
 ```bash
 py build.py package
 ```
 
-Ths will generate 'manually' a **Crafted.class** in **target/classes**, a jar **target/crafted.jar** containing this generated .class, and a class **target/classes/JavaClass.class** compiled from source **java/JavaClass.java** depending on **crafted.jar**
+Ths will generate 'manually' a **Crafted.class** in **target/classes**, and a jar **target/crafted.jar** containing this generated .class. It uses **jvm_class.py** to generate the bytecodeof Crafted.class.
+
+### Using the scala class generator
+
+Transition to scala generation with JvmClass.scala is on the way and the build.py script does not support it yet. To generate and jar the Crafted.class with the JvmClass.scala generator, run 
+
+```bash
+scala JvmClass.scala target/classes/Crafted.class
+jar --verbose --create --file target/crafted.jar -C target/classes Crafted.class
+```
 
 ## Clean target folder
 
 ```bash
 py build.py clean
-```
-
-## Running compiled classes
-
-To run P.main(args) { ... } with `java`
-
-```bash
-py build.py run
 ```
 
 **NB:** This will clean and recompile the sources before actually running
