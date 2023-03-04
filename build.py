@@ -29,7 +29,7 @@ def run():
     os.system(f"java -cp {classes} P")
 
 def help():
-    print("Usage: clean_package <goal> where goal is in { clean; package; run; help }")
+    print("Usage: build <goal> where goal is in { clean; package; run; help }")
 
 if __name__ == "__main__":
     goal = sys.argv[1] if len(sys.argv) > 1 else "help"
