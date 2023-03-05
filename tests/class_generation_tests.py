@@ -92,7 +92,7 @@ class ScalaJvmClassTest(BaseTestClass):
 
     def write_class_file(self) -> None:
         # Compile the scala bytecode generator class
-        scalac = f"scalac -d {self.output_classes} JvmClass.scala"
+        scalac = f"scalac -d {self.output_classes} scala/*.scala"
         self.assert_command_success(scalac)
         # Run the bytecode generator
         writeBytes = f"scala -cp {self.output_classes} writeBytes {self.output_class}"
