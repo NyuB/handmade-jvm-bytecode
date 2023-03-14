@@ -11,6 +11,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macOS-latest]
+        test: [unit, lint]
         include:
           - os: windows-latest
             python-cmd: py
@@ -21,6 +22,12 @@ jobs:
           - os: macOS-latest
             python-cmd: python3
             name: MacOS
+          - test: unit
+            unittest-cmd: tests/class_generation_tests.py
+            test-title: Unit tests
+          - test: lint
+            unittest-cmd: tests/format_tests.py
+            test-title: Linting check
     steps:
       - name: Checkout
         uses: actions/checkout@v1
@@ -28,7 +35,7 @@ jobs:
       - name: Install Scala
         uses: coursier/setup-action@v1
         with:
-          apps: scala scalac
+          apps: scala scalac scalafmt
         
       - name: Check Java
         run: |
@@ -43,5 +50,6 @@ jobs:
       - name: Check Python
         run: ${{ matrix.python-cmd }} --version
       
-      - name: Unit tests
-        run: ${{ matrix.python-cmd }} -m unittest tests/class_generation_tests.py
+      - name: ${{ matrix.test-title }}
+        run: ${{ matrix.python-cmd }} -m unittest ${{ matrix.unittest-cmd }}
+
