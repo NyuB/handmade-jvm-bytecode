@@ -15,19 +15,24 @@ jobs:
         include:
           - os: windows-latest
             python-cmd: py
-            name: Windows
+
           - os: ubuntu-latest
             python-cmd: python3
-            name: Linux
+
           - os: macOS-latest
             python-cmd: python3
-            name: MacOS
+
           - test: unit
             unittest-cmd: tests/class_generation_tests.py
             test-title: Unit tests
+
           - test: lint
             unittest-cmd: tests/format_tests.py
             test-title: Linting check
+
+        exclude:
+          - os: windows-latest
+            test: lint
     steps:
       - name: Checkout
         uses: actions/checkout@v1
